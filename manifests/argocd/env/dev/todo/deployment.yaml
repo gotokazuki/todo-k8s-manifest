@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      serviceAccountName: todo-sa
+      automountServiceAccountToken: false
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: karpenter.sh/nodepool
+                operator: In
+                values:
+                - nodepool-medium-arm64
+      containers:
+        - name: todo
+          image: 163239808716.dkr.ecr.ap-northeast-1.amazonaws.com/goto-common-todo:v0.7.0
+          env:
+            - name: AWS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: todo-env
+                  key: AWS_REGION
+            - name: DYNAMODB_TABLE
+              valueFrom:
+                configMapKeyRef:
+                  name: todo-env
+                  key: DYNAMODB_TABLE
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "100m"
+              memory: "256Mi"
+          ports:
+            - containerPort: 8080
