@@ -25,7 +25,17 @@ Uninstalling ArgoCD:
 
 ```shell
 kubectl delete -n argocd -f manifests/argocd/install
-kubectl delete -f manifests/argocd/init
+```
+
+Since deleting the namespace with kubectl delete may get stuck, use the following command to delete it:
+
+```shell
+(
+NAMESPACE=argocd
+kubectl proxy &
+kubectl get namespace $NAMESPACE -o json |jq '.spec = {"finalizers":[]}' >temp.json
+curl -k -H "Content-Type: application/json" -X PUT --data-binary @temp.json 127.0.0.1:8001/api/v1/namespaces/$NAMESPACE/finalize
+)
 ```
 
 The contents under `manifests/argocd/env/` are managed by ArgoCD.
