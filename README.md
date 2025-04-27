@@ -9,13 +9,23 @@ For more details, please refer to the [eks-project-example](https://github.com/g
 Installing ArgoCD:
 
 ```shell
-kubectl apply -f manifests/argocd/install
+# create argocd namespace
+kubectl apply -f manifests/argocd/init
+# install ArgoCD in argocd namespace
+kubectl apply -n argocd -f manifests/argocd/install
 ```
 
 Registering the ApplicationSet:
 
 ```shell
 kubectl apply -f manifests/argocd/application-set
+```
+
+Uninstalling ArgoCD:
+
+```shell
+kubectl delete -n argocd -f manifests/argocd/install
+kubectl delete -f manifests/argocd/init
 ```
 
 The contents under `manifests/argocd/env/` are managed by ArgoCD.
